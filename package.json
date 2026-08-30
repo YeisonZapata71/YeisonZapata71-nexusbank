@@ -1,0 +1,23 @@
+{
+  "name": "symphony-cloud-orchestrator",
+  "version": "1.0.0",
+  "description": "Prototipo de Arquitectura de Software Cloud-Native - Actividad 2: Orquestando Códigos",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx http-server -p 3000 -c-1 .",
+    "dev": "npx http-server -p 3000 -c-1 ."
+  },
+  "keywords": [
+    "software-architecture",
+    "microservices",
+    "circuit-breaker",
+    "cqrs",
+    "saga-pattern",
+    "event-driven"
+  ],
+  "author": "Estudiante de Ingeniería de Software",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

@@ -1,0 +1,5 @@
+# Ignore documentation and build scripts for source code repository
+docs/
+scripts/
+.gemini/
+*.log
