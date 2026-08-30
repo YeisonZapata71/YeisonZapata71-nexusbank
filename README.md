@@ -22,31 +22,31 @@ Faced with traditional monolithic banking bottlenecks (lock contention on core l
 
 ```mermaid
 graph TB
-    subgraph ClientLayer["🌐 Client Access Layer"]
+    subgraph ClientLayer["Client Access Layer"]
         MobileApp["NexusBank Mobile App (iOS / Android)"]
         WebBanking["Web Banking SPA (React)"]
     end
 
-    subgraph EdgeLayer["🛡️ Edge & Security Layer"]
+    subgraph EdgeLayer["Edge & Security Layer"]
         WAF["AWS WAF (DDoS Shield)"]
         Gateway["Kong API Gateway (Rate Limiting & Auth)"]
     end
 
-    subgraph MicroservicesCluster["☸️ Microservices Cluster (AWS EKS Multi-AZ)"]
+    subgraph MicroservicesCluster["Microservices Cluster (AWS EKS Multi-AZ)"]
         SagaPod["Saga Orchestrator Service"]
         AccountPod["Account & Ledger Service"]
         FraudPod["Anti-Fraud Engine (Circuit Breaker)"]
         NotifPod["Notification Engine"]
     end
 
-    subgraph EventBus["📡 Distributed Messaging Bus"]
+    subgraph EventBus["Distributed Messaging Bus"]
         Broker["Event Broker Pub/Sub (Apache Kafka)"]
     end
 
-    subgraph Persistence["🗄️ CQRS Persistence Tier"]
+    subgraph Persistence["CQRS Persistence Tier"]
         AuroraWrite[("AWS Aurora PostgreSQL (Write Ledger DB)")]
         RedisRead[("ElastiCache Redis (CQRS Read View Cache)")]
-        HSM Vault[("Hardware Security Module (HSM Keys)")]
+        HSMVault[("Hardware Security Module (HSM Keys)")]
     end
 
     MobileApp --> WAF
@@ -58,7 +58,7 @@ graph TB
     SagaPod --> Broker
     AccountPod --> AuroraWrite
     Broker --> RedisRead
-    Gateway --> HSM Vault
+    Gateway --> HSMVault
 ```
 
 ---
