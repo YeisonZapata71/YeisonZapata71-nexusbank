@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusBank Core Cloud - Prototipo de Arquitectura Bancaria (COP)</title>
+  <meta name="description" content="Prototipo interactivo de arquitectura de software bancaria cloud-native con patrones Microservicios, Circuit Breaker, CQRS, Saga Pattern y API Gateway en Pesos Colombianos.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Encabezado Principal Google Design Style -->
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-logo">🏛️ NexusBank Core</span>
+      <span class="badge-tag">Prototipo de Arquitectura Bancaria Cloud (COP)</span>
+    </div>
+  </header>
+
+  <div class="main-container">
+    
+    <!-- Métricas del API Gateway & Circuit Breaker Antifraude -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <span class="metric-label">API Gateway Tokens</span>
+        <span class="metric-value" id="gw-available-tokens">10 / 10</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Peticiones Gateway</span>
+        <span class="metric-value" id="gw-total-req">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Bloqueos Rate Limit</span>
+        <span class="metric-value" id="gw-blocked-rate">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Circuit Breaker (Antifraude)</span>
+        <div style="margin-top:4px;">
+          <span id="cb-state-badge" class="status-badge state-closed">CLOSED</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Columna Izquierda: Panel Bancario -->
+      <div class="dashboard-sidebar">
+        
+        <!-- Panel 1: Transferencia Interbancaria Saga -->
+        <div class="card">
+          <div class="card-title">
+            <span>💳 Realizar Transferencia (Saga Pattern)</span>
+          </div>
+          <div class="form-group">
+            <label for="select-source-acc">Cuenta Origen:</label>
+            <select id="select-source-acc" class="form-control">
+              <option value="ACC-9988-COLL">Juan Pérez (Nómina - Saldo: $ 12.850.000 COP)</option>
+              <option value="ACC-5544-SAVE">María Rodríguez (Ahorros - Saldo: $ 5.400.000 COP)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="select-target-acc">Cuenta Destino:</label>
+            <select id="select-target-acc" class="form-control">
+              <option value="ACC-1122-DEST">Carlos Gómez (Cuenta Destino)</option>
+              <option value="ACC-5544-SAVE">María Rodríguez (Ahorros)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="input-amount">Monto ($ COP):</label>
+            <input type="number" id="input-amount" class="form-control" value="250000" min="1000" step="50000">
+          </div>
+          <button id="btn-execute-transfer" class="btn-primary">💸 Transferir Fondos (Orquestar Saga)</button>
+        </div>
+
+        <!-- Panel 2: Inyección de Fallos de Seguridad -->
+        <div class="card">
+          <div class="card-title">
+            <span>🛡️ Resiliencia & Inyección de Fallos</span>
+          </div>
+          <p style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">
+            Simula caídas de red en el Motor Antifraude para forzar la conmutación del Circuit Breaker y la reversión compensatoria.
+          </p>
+          <button id="btn-inject-fraud-fault" class="btn-danger">⚡ Inyectar Caída en Motor Antifraude</button>
+          <button id="btn-rate-limit-spike" class="btn-secondary" style="width:100%; margin-top:8px;">🌊 Simular Ráfaga (Rate Limiting Spike)</button>
+        </div>
+
+        <!-- Panel 3: Circuit Breaker Telemetría -->
+        <div class="card">
+          <div class="card-title">
+            <span>📈 Telemetría Circuit Breaker</span>
+            <button id="btn-reset-cb" class="btn-secondary" style="padding:2px 8px; font-size:11px;">Reset</button>
+          </div>
+          <ul style="font-size:13px; list-style:none; color:var(--text-secondary);">
+            <li style="margin-bottom:6px;">Fallos Consecutivos: <strong id="cb-failure-count" style="color:var(--text-primary)">0 / 3</strong></li>
+            <li style="margin-bottom:6px;">Peticiones Totales: <strong id="cb-total-req" style="color:var(--text-primary)">0</strong></li>
+            <li style="margin-bottom:6px;">Rechazos Fast-Fail: <strong id="cb-rejected-req" style="color:var(--text-primary)">0</strong></li>
+          </ul>
+        </div>
+
+        <!-- Panel 4: Saldos Bancarios en Tiempo Real -->
+        <div class="card">
+          <div class="card-title">
+            <span>🏛️ Cuentas de Cliente (Libro Mayor COP)</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No. Cuenta</th>
+                <th>Titular</th>
+                <th>Saldo Actual</th>
+              </tr>
+            </thead>
+            <tbody id="accounts-table-body">
+              <!-- Render dinámico -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- Columna Derecha: Diagramas y Consolas -->
+      <div class="dashboard-main">
+        
+        <!-- Traza Saga Bancaria -->
+        <div class="card">
+          <div class="card-title">
+            <span>🔄 Traza de Transferencia Saga (Orquestación Distribuida)</span>
+          </div>
+          <div id="saga-execution-log">
+            <p class="empty-msg" style="color:var(--text-secondary); font-size:13px;">Haz clic en "Transferir Fondos" para visualizar la secuencia de débito, antifraude y abono.</p>
+          </div>
+        </div>
+
+        <!-- Vista CQRS Materializada -->
+        <div class="card">
+          <div class="card-title">
+            <span>⚡ CQRS Read Model (Vista de Extracto Bancario en Caché)</span>
+          </div>
+          <div id="cqrs-read-table">
+            <!-- Render dinámico -->
+          </div>
+        </div>
+
+        <!-- Bus Pub/Sub Feed -->
+        <div class="card">
+          <div class="card-title">
+            <span>📡 Bus de Eventos Financieros (Kafka Log)</span>
+          </div>
+          <div id="event-stream-log" class="console-box">
+            <!-- Logs en vivo -->
+          </div>
+        </div>
+
+        <!-- Notificaciones -->
+        <div class="card">
+          <div class="card-title">
+            <span>🔔 Notificaciones SMS / Push de Seguridad</span>
+          </div>
+          <div id="notification-log">
+            <!-- Render dinámico -->
+          </div>
+        </div>
+
+        <!-- Diagramas UML Google Style -->
+        <div class="card">
+          <div class="card-title">
+            <span>📐 Diseños de Arquitectura UML (NexusBank Core)</span>
+          </div>
+          
+          <div class="tab-header">
+            <button class="tab-btn active" data-tab="usecase">1. Casos de Uso Bancarios</button>
+            <button class="tab-btn" data-tab="classes">2. Clases OOD</button>
+            <button class="tab-btn" data-tab="sequence">3. Secuencia Saga</button>
+            <button class="tab-btn" data-tab="deployment">4. Despliegue Cloud (AWS)</button>
+          </div>
+
+          <!-- Pestaña 1: Casos de Uso -->
+          <div id="pane-usecase" class="diagram-pane active">
+            <div class="diagram-box" style="text-align:center;">
+              <img src="docs/images/uml_usecase.png" alt="Diagrama de Casos de Uso Bancarios" style="max-width:100%; height:auto; border-radius:6px; border:1px solid #dadce0;">
+            </div>
+            <div class="diagram-description">
+              <strong>Justificación del Diagrama de Casos de Uso:</strong> Establece los límites del dominio financiero de NexusBank Colombia. Muestra cómo las transferencias móviles interactúan con la evaluación antifraude y el flujo de compensación transaccional (UC-06) en caso de rechazo de la red.
+            </div>
+          </div>
+
+          <!-- Pestaña 2: Clases -->
+          <div id="pane-classes" class="diagram-pane">
+            <div class="diagram-box" style="text-align:center;">
+              <img src="docs/images/uml_classes.png" alt="Diagrama de Clases Orientado a Objetos" style="max-width:100%; height:auto; border-radius:6px; border:1px solid #dadce0;">
+            </div>
+            <div class="diagram-description">
+              <strong>Justificación del Diagrama de Clases:</strong> Representa la estructura de componentes desacoplados siguiendo los principios OOD y SOLID. Aisla el gateway de entrada, los patrones de resiliencia (CircuitBreaker), el orquestador bancario y la separación CQRS.
+            </div>
+          </div>
+
+          <!-- Pestaña 3: Secuencia -->
+          <div id="pane-sequence" class="diagram-pane">
+            <div class="diagram-box" style="text-align:center;">
+              <img src="docs/images/uml_sequence.png" alt="Diagrama de Secuencia Saga" style="max-width:100%; height:auto; border-radius:6px; border:1px solid #dadce0;">
+            </div>
+            <div class="diagram-description">
+              <strong>Justificación del Diagrama de Secuencia:</strong> Ilustra el ciclo de vida de la transacción monetaria distribuida. En el flujo excepcional (antifraude o fallo de red), la Saga ejecuta inmediatamente la compensación en sentido inverso para devolver los fondos intactos a la cuenta de origen.
+            </div>
+          </div>
+
+          <!-- Pestaña 4: Despliegue Cloud -->
+          <div id="pane-deployment" class="diagram-pane">
+            <div class="diagram-box" style="text-align:center;">
+              <img src="docs/images/uml_deployment.png" alt="Diagrama de Despliegue Cloud AWS" style="max-width:100%; height:auto; border-radius:6px; border:1px solid #dadce0;">
+            </div>
+            <div class="diagram-description">
+              <strong>Justificación del Diagrama de Despliegue:</strong> Muestra la infraestructura multi-zona de alta disponibilidad en AWS (EKS Kubernetes), protegida por AWS WAF, módulo criptográfico de hardware (HSM PCI-DSS) y separación CQRS entre Aurora PostgreSQL y Redis Cluster.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
